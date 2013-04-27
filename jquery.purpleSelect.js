@@ -1,5 +1,5 @@
 /**
- * SEF (self-executed function), extending $.fn object (a prototype of jWuery object) with purpleSelect method.
+ * SEF (self-executed function), extending $.fn object (a prototype of jQuery object) with purpleSelect method.
  * jQuery, window arguments used to avoid their possible redefinition by dark side. Missed third parameter used
  * to create an "excellent undefined": pure, clean and absolutely undefined.
  *
