@@ -52,12 +52,51 @@
      * @this {HTMLElement}
      * @return {*}
      */
+
+
     $.fn.purpleSelect.wrapSelect = function (options) {
+        var elClass = $(this).attr('class'),
+            elId = $(this).attr('id'),
+            elWidth = $(this).width(),
+            elHeight = $(this).height(),
+            placeholder = 'placeholder',
+            $selectOptions = $(this).children(),
+            selectOptions = $(this).children().map(function(){ return $(this).text() }).get();
+
+        var purpleFrame = '<div id="' + elId + '" class="purple-wrap ' + elClass + '"' +
+            ' style="width: ' + elWidth + 'px; position: relative;">' +
+            '<div class="curr-value" style="width: 100%; height: ' + elHeight + 'px;" value="' + placeholder + '">' + placeholder + '</div>' +
+            '<div class="list-wrap" style="width: 100%; position: absolute; top: ' + elHeight + 'px; display: none;"></div></div>';
+
+        $(this).replaceWith(purpleFrame);
+
+        $selectOptions.each(function(){
+            $(this).contents().appendTo('.list-wrap').wrap('<div class="p-item" style="width: 100%; height: ' + elHeight + 'px;"/>');
+        });
+
+        $('#' + elId)
+            .click(function(){
+                $(this).children('.list-wrap').toggle();
+            });
+
+        $('#' + elId + ' .p-item')
+            .hover(function(){
+                $(this).css("background-color", "purple");
+            },function(){
+                $(this).css("background-color", "transparent");
+            })
+            .click(function(){
+                $('#' + elId + ' .p-item').filter(function(){return $(this).css("display") == "none"}).toggle();
+                $(this).toggle();
+                $('#' + elId + ' .curr-value').text($(this).text()).attr('value', $(this).text());
+            });
+
         console.log('Options:');
         console.log(options);
 
         console.log('Victim select:');
-        console.log(this);
+        console.log(this)
+
         return this;
     };
 
