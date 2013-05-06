@@ -6,6 +6,7 @@
         <title></title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" type="text/css" href="jquery.purpleSelect.css" />
         <script>
             /**
              * SEF-function with no parameters passed. Defines empty stubs for console methods in
@@ -45,22 +46,22 @@
         <p>
             This is victim:
             <select id="victim">
-                <!--<option value="000">1968 — Hush</option>-->
-                <!--<optgroup label="Mark 1">-->
+                <option value="000">1968 — Hush</option>
+                <optgroup label="Mark 1">
                     <option value="001">1968 — Shades of Deep Purple</option>
                     <option value="002">1968 — The Book of Taliesyn</option>
                     <option value="003">1969 — Deep Purple</option>
-                <!--</optgroup>-->
+                </optgroup>
                 <!--<optgroup label="Mark 2">-->
                     <option value="004">1970 — Deep Purple in Rock</option>
                     <option value="005">1971 — Fireball</option>
                     <option value="006">1972 — Machine Head</option>
                     <option value="007">1973 — Who Do We Think We Are</option>
                 <!--</optgroup>-->
-                <!--<optgroup label="Mark 3">-->
+                <optgroup label="Mark 3">
                     <option value="008">1974 — Burn</option>
                     <option value="009">1974 — Stormbringer</option>
-                <!--</optgroup>-->
+                </optgroup>
                 <!--<optgroup label="Mark 4">-->
                     <option value="010">1975 — Come Taste the Band</option>
                 <!--</optgroup>-->
@@ -107,15 +108,18 @@
 
         <script src="jquery.purpleSelect.js"></script>
         <script>
-            $('.curr-value').click(function(){
-                $('.list-wrap').toggle();
-            });
+//            $('.curr-value').click(function(){
+//                $('.list-wrap').toggle();
+//            });
 
 
             /**
              * Main magic goes here
              */
-            $('#victim').purpleSelect({});
+            $('#victim').purpleSelect({
+                instanceClassName: 'custom-select',
+                instancePlaceholder: 'placeholder'
+            });
         </script>
     </body>
 </html>
