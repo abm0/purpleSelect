@@ -19,16 +19,22 @@
         this.parent = parent;
         this.$parent = $(parent);
         this.options = options;
-        if (
-            (this.items = this._parseSelect(this.$parent)) &&
-            (this.$replacement = this._$buildDOM()) &&
-            (this.setEventListener())
-        ) {
+        this.items = this._parseSelect(this.$parent);
+        this.$replacement = this._$buildDOM();
+        this.setEventListener();
+
+//        if (
+//            (this.items = this._parseSelect(this.$parent)) &&
+//            (this.$replacement = this._$buildDOM()) &&
+//            (this.setEventListener())
+//        ) {
             this.afterInit();
-        }
+//        }
     }
 
     PurpleSelect.prototype.afterInit = function () {
+        console.log('ACHTUNG!');
+        console.log(this.$replacement);
         this.$parent.hide().after(this.$replacement);
         this.options.afterInit();
     }
@@ -41,35 +47,59 @@
         if (!$select.is('select')) {
             return false;
         }
-        var items = [];
+        // объявляем массив-контейнер для распарсенного селекта
+        var parsedDom = [],
+        // временный объект для каждой группы опций
+            group = {
+                type: 'optgroup',
+                items: []
+            },
+        // временный объект для каждой опции
+            option = {
+                type: 'option'
+            };
         $select.find('option').each(function () {
-            var item = {},
-                optgroup = {},
-                victim,
-                $me = $(this),
-                lastItem = items.length;
-            if ($me.parent().is('optgroup')) {
-                if ((!lastItem) || (items[lastItem - 1].type == 'option')) {
-                    optgroup.type = 'optgroup';
-                    optgroup.label = $me.parent('optgroup').attr('label');
-                    optgroup.value = 0;
-                    optgroup.items = [];
-                    items.push(optgroup);
-                    lastItem++;
+            var $me = $(this);
+            // TODO: проверять disabled
+            // присваиваем свойствам объекта опции html и значение опции, к которой обращаемся в данный момент
+            option.label = $me.html();
+            option.value = $me.val();
+            // если опция находится в группе опций
+            if($me.parent().is('optgroup')){
+                // добавляем опцию в глобальную группу опций
+                group.items.push($.extend({}, option));
+                group.label = $me.parent().attr('label');
+                // если опция - последняя в группе
+                if(!$me.next().length){
+                    // добавляем группу с опциями в глобальный массив - контейнер
+                    parsedDom.push($.extend({}, group));
+                    group.label = '';
+                    // очищаем массив опций в группе
+                    group.items = [];
                 }
-                victim = items[lastItem - 1].items;
+                // если опция находится в селекте
             } else {
-                victim = items;
+                //  добавляем опцию в глобальный контейнер
+                parsedDom.push($.extend({}, option));
             }
-            item.type = 'option';
-            item.label = $me.html();
-            item.value = $me.val();
-            victim.push(item);
         });
 
-        console.log(items);
+        console.log('final parsed dom: ');
+        console.log(parsedDom);
 
-        return items;
+        return parsedDom;
+    }
+
+
+    /**
+     * Returns class name for given type of customized element
+     * @param itemType
+     * @return {string}
+     * @private
+     */
+    PurpleSelect.prototype._DOMclass = function (itemType) {
+        var className = 'purple-select__' + itemType;
+        return className;
     }
 
     /**
@@ -79,42 +109,37 @@
      */
     PurpleSelect.prototype._$buildDOM = function () {
         var $container = $('<div />', {
-            class: this.options.instanceClassName/*,
-            css: {
-                width: this.$parent.width(),
-                position: 'relative'
-            }*/
+            class: this.options.instanceClassName
         });
-
 //        There should be created all wrapper Elements, i.e. scroll, wrapper, hidden inputs, if any, etc.
-        // ***************************************************
-//        this.items.each(function (index, item) {
-//            if (item.type == 'optgroup') {
-//                $(this).wrap('<div class="optgroup" />');
-//            } else if (item.type == 'option') {
-//                $(this).wrap('<div class="option" />');
-//            }
-//        })
-        for(var i = 0; i < this.items.length; i++){
-            if(this.item[i].type == 'optgroup'){
-
-            } else if {
-
+        for (var i in this.items){
+            var $tempItem = $();
+            if(this.items[i].type == 'optgroup') {
+                // $tempItem = MAGIC(this.items[i]); - функция MAGIC берет в качестве параметра объект и возвращает дом-элемент заданного класса и, если надо, с нужным текстом
+                $tempItem = $('<div />', {
+                    class: this._DOMclass(this.items[i].type)
+                });
+                for (var j in this.items[i].items) {
+                    // $tempItem = MAGIC(this.items[i]);
+                    var $tempSubItem = $('<div />', {
+                        class: this._DOMclass(this.items[i].items[j].type),
+                        text: this.items[i].items[j].label
+                    });
+                    $tempItem.append($tempSubItem);
+                }
+            } else {
+                // $tempItem = MAGIC(this.items[i]);
+                $tempItem = $('<div />', {
+                    class: this._DOMclass(this.items[i].type),
+                    text: this.items[i].label
+                });
             }
+            $container.append($tempItem);
         }
-         // **************************************************
-//            selectOptions = this.$parent.children('option'),
-//            targetHeight = this.$parent.height(),
-//            placeholder = (this.options.instancePlaceholder)? this.options.instancePlaceholder : $(selectOptions[0]).text();
-//        $container.append(
-//            '<div class="currentVal" style="position: absolute; padding: 0 5px; top: 0; border: 1px solid purple; width: 100%; height: ' + targetHeight + 'px;">' + placeholder + '</div>' +
-//            '<div class="purpleList" style="position: absolute; padding: 0 5px; border: 1px solid purple; width: 100%; display: none; top: ' + targetHeight + 'px;">' +
-//            selectOptions.map(
-//                function(){
-//                    return $(this).wrapInner('<div style="height: ' + targetHeight + 'px;" />').html()
-//                }).get().join('')
-//            + '</div>'
-//        );
+
+        console.log('constructed DOM: ');
+        console.log($container);
+
         return $container;
     }
 
@@ -173,8 +198,6 @@
         console.log($(this));
         this.purpleSelect = new PurpleSelect (this, options);
 
-//        $(this).replaceWith(this.purpleSelect.$replacement);
-
         console.log('Options:');
         console.log(options);
 
@@ -185,32 +208,6 @@
     };
 
     PurpleSelect.prototype.setEventListener = function(){
-//        this.$replacement.children('.currentVal').click(function(){
-//            $(this).siblings('.purpleList').toggle();
-//        });
-
-//        this.$replacement.find('.purpleList').children()
-//            .hover(
-//                function(){
-//                    $(this).css({
-//                        'background-color': 'purple',
-//                        'color': 'white'
-//                    });
-//                },
-//                function(){
-//                    $(this).css({
-//                        'background-color': 'white',
-//                        'color': 'black'
-//                    });
-//                })
-//            .click(function(){
-//                $(this).parent().siblings('.currentVal').text($(this).text());
-//                $(this).parent().siblings('.purplePlaceholder').hide();
-//                $(this).add($(this).parent()).hide();
-//                $(this).siblings().filter(function(){
-//                    return $(this).css('display') == 'none';
-//                }).show();
-//            });
     };
 
 })(jQuery, window);
